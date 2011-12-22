@@ -10,7 +10,6 @@ package com.fortitude.recitedictcn;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.net.URL;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.*;
@@ -18,16 +17,8 @@ import android.view.View.*;
 import android.widget.*;
 import android.database.Cursor;
 import android.util.Log;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.parsers.SAXParser;
-import org.xml.sax.SAXException;
-import org.xml.sax.Parser;
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.XMLReader;
-import org.xml.sax.InputSource;
 
 import com.fortitude.recitedictcn.DataBase;
-import com.fortitude.recitedictcn.DictcnXMLHandler;
 
 public class NewWord extends Activity {
     DataBase db;
@@ -45,50 +36,8 @@ public class NewWord extends Activity {
                     t.show();
                     return;
                 }
-
-                /* TODO:
-                   此处代码需要更新为根据UserPreference中db中存储的选项，选择是从本地字典中加载单词，或从网络中加载单词
-                   2011/12/19
-                 */
-                try {
-                    /* 测试XML读取 */
-                    URL url = new URL("http://dict.cn/ws.php?utf8=true&q=" + word);
-
-                    /* Get a SAXParser from the SAXPArserFactory. */
-                    SAXParserFactory spf = SAXParserFactory.newInstance();
-                    SAXParser sp = spf.newSAXParser();
-
-                    /* Get the XMLReader of the SAXParser we created. */
-                    XMLReader xr = sp.getXMLReader();
-                    /* Create a new ContentHandler and apply it to the XML-Reader*/
-                    DictcnXMLHandler myHandler = new DictcnXMLHandler();
-                    xr.setContentHandler(myHandler);
-
-                    /* Parse the xml-data from our URL. */
-                    xr.parse(new InputSource(url.openStream()));
-                    /* Parsing has finished. */ 
-
-                    /* 取出解析结果 */
-                    String text = myHandler.getWordContent();
-
-                    /* 将结果存入db */
-                    db.insertWord(word, nFamiliar, text);
-
-                    /* 设置activity结果，返回主activity */
-                    NewWord.this.setResult(0);
-
-                    db.close();
-
-                    finish();
-                } catch (Exception e) {
-                    Toast t = Toast.makeText(NewWord.this, "处理XML出现错误，请重试，错误信息：" + e.getMessage(), Toast.LENGTH_SHORT);
-                    t.show();
-                    Log.e("NewWordActivity", "XMLParse error", e);
-
-                    /* 设置activity结果，返回主activity */
-                    NewWord.this.setResult(0);
-                    finish();
-                }
+                
+                /* TODO: 调用QueryWord类实现单词释义查询，通过判断查询结果是否为空串给出提示信息 */
             }
         };
 

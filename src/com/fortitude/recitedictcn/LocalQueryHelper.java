@@ -7,7 +7,7 @@
 
 package com.fortitude.recitedictcn;
 
-public class LocalQuery {
+public class LocalQueryHelper {
     public static String query(String newWord) {
         return "";
     }

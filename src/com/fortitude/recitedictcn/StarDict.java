@@ -7,11 +7,14 @@
 
 package com.fortitude.recitedictcn;
 
+import com.fortitude.recitedictcn.DictZipFile;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+
 
 class Location {
 	public int offset;
@@ -30,7 +33,7 @@ public class StarDict {
 	 * 
 	 */
 	public StarDict() {
-		this("//sdcard/dict");
+		this("//mnt/sdcard/recitedictcn/langdao_ec_gb");
 	}
 	
 	/**
@@ -41,7 +44,7 @@ public class StarDict {
 		try {
 			this.dictname = dictname;
 			this.index = new RandomAccessFile(dictname+".idx", "r");
-			this.dz = new DictZipFile(dictname+".dict.dz");
+			this.dz = new DictZipFile(dictname+".dict.gz");
 			this.yaindex = new RandomAccessFile(dictname+".yaidx", "r");
 			//this.dz.runtest();
 		}

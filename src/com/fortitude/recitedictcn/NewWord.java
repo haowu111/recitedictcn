@@ -19,16 +19,21 @@ import android.database.Cursor;
 import android.util.Log;
 
 import com.fortitude.recitedictcn.DataBase;
+import com.fortitude.recitedictcn.QueryWord;
 
 public class NewWord extends Activity {
     DataBase db;
+    QueryWord queryWord;
     EditText wordTv;
     EditText familiarTv;
+    RadioGroup queryMethodRG;
 
     private OnClickListener buttonListener = new OnClickListener() {
             public void onClick(View v) {
                 String word = wordTv.getText().toString();
                 String familiar = familiarTv.getText().toString();
+                int queryMethod = queryMethodRG.getCheckedRadioButtonId();
+                String queryResult;
 
                 Integer nFamiliar = Integer.parseInt(familiar);
                 if ((1 > nFamiliar) || (5 < nFamiliar)) {
@@ -36,8 +41,28 @@ public class NewWord extends Activity {
                     t.show();
                     return;
                 }
-                
-                /* TODO: 调用QueryWord类实现单词释义查询，通过判断查询结果是否为空串给出提示信息 */
+
+                /* dispatch user query */
+                if (queryMethod == R.id.localQuery) {
+                    queryResult = queryWord.QueryWordWithChoice(word, false);
+                }
+                else {
+                    queryResult = queryWord.QueryWordWithChoice(word, true);                    
+                }
+
+                if (0 == queryResult.length()) {
+                    Toast t = Toast.makeText(NewWord.this, "Query Failed", Toast.LENGTH_SHORT);
+                    t.show();
+                    return;                    
+                }
+
+                /* store the new word into db */
+                db.insertWord(word, nFamiliar, queryResult);
+                db.close();
+
+                /* set activity result */
+                NewWord.this.setResult(0);
+                finish();
             }
         };
 
@@ -51,12 +76,16 @@ public class NewWord extends Activity {
         db = new DataBase(this);
         db.open();
 
-        Button button = (Button)findViewById(R.id.AddNewButton);
+        queryWord = new QueryWord();
+
+        Button button = (Button)findViewById(R.id.addNewButton);
         button.setOnClickListener(buttonListener);
 
-        wordTv = (EditText)findViewById(R.id.WordNameInput);
-        familiarTv = (EditText)findViewById(R.id.WordFamiliarityInput);
+        wordTv = (EditText)findViewById(R.id.wordNameInput);
+        familiarTv = (EditText)findViewById(R.id.wordFamiliarityInput);
+        queryMethodRG = (RadioGroup)findViewById(R.id.queryMethodRG);
+
+        /* use local query as default */
+        queryMethodRG.check(R.id.localQuery);
     }
-
-
 }

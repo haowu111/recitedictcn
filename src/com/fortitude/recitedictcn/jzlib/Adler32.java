@@ -1,6 +1,6 @@
 /* -*-mode:java; c-basic-offset:2; -*- */
 /*
-Copyright (c) 2000-2011 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2000,2001,2002,2003 ymnk, JCraft,Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -34,87 +34,60 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.jcraft.jzlib;
 
-final class Adler32 implements Checksum {
+final class Adler32{
 
   // largest prime smaller than 65536
   static final private int BASE=65521; 
   // NMAX is the largest n such that 255n(n+1)/2 + (n+1)(BASE-1) <= 2^32-1
   static final private int NMAX=5552;
 
-  private long adler=1L;
+  long adler32(long adler, byte[] buf, int index, int len){
+    if(buf == null){ return 1L; }
 
-  public void reset(long init){
-    adler=init;
-  }
-
-  public void reset(){
-    adler=1L;
-  }
-
-  public long getValue(){
-    return adler;
-  }
-
-  public void update(byte[] buf, int index, int len){
     long s1=adler&0xffff;
     long s2=(adler>>16)&0xffff;
+    int k;
 
-    while(len>0) {
-      int k=len<NMAX?len:NMAX;
+    while(len > 0) {
+      k=len<NMAX?len:NMAX;
       len-=k;
-      while(k-->0){
-	s1+=buf[index++]&0xff; s2+=s1;
+      while(k>=16){
+        s1+=buf[index++]&0xff; s2+=s1;
+        s1+=buf[index++]&0xff; s2+=s1;
+        s1+=buf[index++]&0xff; s2+=s1;
+        s1+=buf[index++]&0xff; s2+=s1;
+        s1+=buf[index++]&0xff; s2+=s1;
+        s1+=buf[index++]&0xff; s2+=s1;
+        s1+=buf[index++]&0xff; s2+=s1;
+        s1+=buf[index++]&0xff; s2+=s1;
+        s1+=buf[index++]&0xff; s2+=s1;
+        s1+=buf[index++]&0xff; s2+=s1;
+        s1+=buf[index++]&0xff; s2+=s1;
+        s1+=buf[index++]&0xff; s2+=s1;
+        s1+=buf[index++]&0xff; s2+=s1;
+        s1+=buf[index++]&0xff; s2+=s1;
+        s1+=buf[index++]&0xff; s2+=s1;
+        s1+=buf[index++]&0xff; s2+=s1;
+        k-=16;
+      }
+      if(k!=0){
+        do{
+          s1+=buf[index++]&0xff; s2+=s1;
+        }
+        while(--k!=0);
       }
       s1%=BASE;
       s2%=BASE;
     }
-    adler=(s2<<16)|s1;
-  }
-
-  public Adler32 copy(){
-    Adler32 foo = new Adler32();
-    foo.adler = this.adler;
-    return foo;
-  }
-
-  // The following logic has come from zlib.1.2.
-  static long combine(long adler1, long adler2, long len2){
-    long BASEL = (long)BASE;
-    long sum1;
-    long sum2;
-    long rem;  // unsigned int
-
-    rem = len2 % BASEL;
-    sum1 = adler1 & 0xffffL;
-    sum2 = rem * sum1;
-    sum2 %= BASEL; // MOD(sum2);
-    sum1 += (adler2 & 0xffffL) + BASEL - 1;
-    sum2 += ((adler1 >> 16) & 0xffffL) + ((adler2 >> 16) & 0xffffL) + BASEL - rem;
-    if (sum1 >= BASEL) sum1 -= BASEL;
-    if (sum1 >= BASEL) sum1 -= BASEL;
-    if (sum2 >= (BASEL << 1)) sum2 -= (BASEL << 1);
-    if (sum2 >= BASEL) sum2 -= BASEL;
-    return sum1 | (sum2 << 16);
+    return (s2<<16)|s1;
   }
 
   /*
   private java.util.zip.Adler32 adler=new java.util.zip.Adler32();
-  void adler32(byte[] buf, int index, int len){
+  long adler32(long value, byte[] buf, int index, int len){
+    if(value==1) {adler.reset();}
     if(buf==null) {adler.reset();}
     else{adler.update(buf, index, len);}
-  }
-  void reset(){
-    adler.reset();
-  }
-  void reset(long init){
-    if(init==1L){
-      adler.reset();
-    }
-    else{
-      System.err.println("unsupported operation");
-    }
-  }
-  long getValue(){
     return adler.getValue();
   }
   */

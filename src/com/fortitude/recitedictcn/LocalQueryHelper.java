@@ -7,8 +7,17 @@
 
 package com.fortitude.recitedictcn;
 
+import com.fortitude.recitedictcn.StarDict;
+
 public class LocalQueryHelper {
-    public static String query(String newWord) {
-        return "";
+
+    private StarDict stardict;
+
+    public LocalQueryHelper() {
+        stardict = new StarDict();
+    }
+
+    public String query(String newWord) {
+        return stardict.getExplanation(newWord);
     }
 }

@@ -22,7 +22,7 @@ import javax.xml.parsers.SAXParser;
 import com.fortitude.recitedictcn.DictcnXMLHandler;
 
 public class NetQueryHelper {
-    public static String query(String newWord) {
+    public String query(String newWord) {
         try {
             /* 测试XML读取 */
             URL url = new URL("http://dict.cn/ws.php?utf8=true&q=" + newWord);

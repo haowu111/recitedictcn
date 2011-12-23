@@ -1,6 +1,6 @@
 /* -*-mode:java; c-basic-offset:2; -*- */
 /*
-Copyright (c) 2011 ymnk, JCraft,Inc. All rights reserved.
+Copyright (c) 2000,2001,2002,2003 ymnk, JCraft,Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -93,20 +93,22 @@ final class InfBlocks{
   int end;             // one byte after sliding window 
   int read;            // window read pointer 
   int write;           // window write pointer 
-  private boolean check;
+  Object checkfn;      // check function 
+  long check;          // check on output 
 
   InfTree inftree=new InfTree();
 
-  InfBlocks(ZStream z, int w){
+  InfBlocks(ZStream z, Object checkfn, int w){
     hufts=new int[MANY*3];
     window=new byte[w];
     end=w;
-    this.check = (z.istate.wrap==0) ? false : true;
+    this.checkfn = checkfn;
     mode = TYPE;
-    reset(z);
+    reset(z, null);
   }
 
-  void reset(ZStream z){
+  void reset(ZStream z, long[] c){
+    if(c!=null) c[0]=check;
     if(mode==BTREE || mode==DTREE){
     }
     if(mode==CODES){
@@ -116,9 +118,9 @@ final class InfBlocks{
     bitk=0;
     bitb=0;
     read=write=0;
-    if(check){
-      z.adler.reset();
-    }
+
+    if(checkfn != null)
+      z.adler=check=z._adler.adler32(0L, null, 0, 0);
   }
 
   int proc(ZStream z, int r){
@@ -531,7 +533,7 @@ final class InfBlocks{
   }
 
   void free(ZStream z){
-    reset(z);
+    reset(z, null);
     window=null;
     hufts=null;
     //ZFREE(z, s);
@@ -568,9 +570,8 @@ final class InfBlocks{
     z.total_out += n;
 
     // update check information
-    if(check){
-      z.adler.update(window, q, n);
-    }
+    if(checkfn != null)
+      z.adler=check=z._adler.adler32(check, window, q, n);
 
     // copy as far as end of window
     System.arraycopy(window, q, z.next_out, p, n);
@@ -594,9 +595,8 @@ final class InfBlocks{
       z.total_out += n;
 
       // update check information
-      if(check){
-	z.adler.update(window, q, n);
-      }
+      if(checkfn != null)
+	z.adler=check=z._adler.adler32(check, window, q, n);
 
       // copy
       System.arraycopy(window, q, z.next_out, p, n);

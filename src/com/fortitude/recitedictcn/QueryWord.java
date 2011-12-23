@@ -8,22 +8,26 @@
 /* 本文件用于查询新词，根据用户选项确定从本地查询或查询 */
 package com.fortitude.recitedictcn;
 
-import com.fortitude.recitedictcn.DictcnXMLHandler;
+import com.fortitude.recitedictcn.LocalQueryHelper;
+import com.fortitude.recitedictcn.NetQueryHelper;
 
 public class QueryWord {
-    
+
+    private LocalQueryHelper localQueryHelper;
+    private NetQueryHelper netQueryHelper;
+
     public QueryWord () {
-        
+        localQueryHelper = new LocalQueryHelper();
+        netQueryHelper = new NetQueryHelper();
     }
 
-    public static String QueryWordWithChoice(String newWord, boolean queryNetwork) {
+    public String QueryWordWithChoice(String newWord, boolean queryNetwork) {
         if (true == queryNetwork) {
+            return netQueryHelper.query(newWord);
         }
-
-        if (false == queryNetwork) {
+        else {
+            return localQueryHelper.query(newWord);
         }
-        
-        return "";
     }
 }
 

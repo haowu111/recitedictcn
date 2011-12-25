@@ -144,6 +144,7 @@ public class DictZipFile {
 		byte [] buffer = new byte[2];
 		dictzip.read(buffer);
 		this._firstpos+=2;
+        /* stardict lib/dictziplib.cpp GZIP_MAGIC1 / GZIP_MAGIC2 ,fortitude.zhang, 2011/12/25 */
 		if (buffer[0]!= 31 || buffer[1] != -117) {
 			throw new Exception("Not a gzipped file");
 		}
@@ -161,6 +162,10 @@ public class DictZipFile {
 		this._firstpos+=6;
 		int xlen = 0;
 		if((flag & FEXTRA)!=0) {
+            /* Don't be confused,as in gzip standard discribed, gzip header use little endian,why?I donnot know.See below:
+             *  http://www.gzip.org/zlib/rfc-gzip.html#header-trailer
+             * fortitude.zhang, 2011/12/25
+             */
 			xlen = dictzip.readUnsignedByte();
 			xlen +=  256*dictzip.readUnsignedByte();
 			byte [] extra = new byte[xlen];

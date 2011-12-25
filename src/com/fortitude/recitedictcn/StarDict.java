@@ -121,21 +121,26 @@ public class StarDict {
 		int mid = 0;
 		Location l = new Location();
 		String exp = null;
-		//return this.dz.test()+this.dz.last_error;
-		///*
+        int cmp = 0;
+
 		while( i<=max ) {
 			mid = (i + max)/2;
 			w = getWord(mid, l);
-			if (w.compareTo(word)>0) {
+            /* use search algorithm used by stardict,otherwise we will found the wrong word,
+             * fortitude.zhang, 2011/12/26 
+             */
+            cmp = stardictStrcmp(w, word);
+			if (cmp>0) {
 				max = mid-1;
 			}
-			else if(w.compareTo(word)<0) {
+			else if(cmp<0) {
 				i = mid+1;
 			} 
 			else {
 				break;
 			}
 		}
+
 		//get explanation
 		byte [] buffer = new byte[l.size];
 		this.dz.seek(l.offset);
@@ -207,7 +212,29 @@ public class StarDict {
 		return 0;
 	}
 
-	
+    /* stardict_strcmp, we need this function
+       gint a=g_ascii_strcasecmp(s1, s2);
+       if (a == 0)
+       return strcmp(s1, s2);
+       else
+       return a;
+     * fortitude.zhang, 2011/12/26
+     */
+    private int stardictStrcmp(String str1, String str2) {
+        int a;
+
+        /* Java doc:
+         * a negative integer, zero, or a positive integer as the specified String is greater than, equal to, 
+         * or less than this String, ignoring case considerations.
+         */
+        a = str1.compareToIgnoreCase(str2);
+        if (0 == a) {
+            a = str1.compareTo(str2);
+        }
+
+        return a;
+    }
+
 	public static void main(String[] args) {
 		StarDict dict = new StarDict();
 		//System.out.println(dict.getVersion());

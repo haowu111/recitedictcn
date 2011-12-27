@@ -11,10 +11,10 @@ import com.fortitude.recitedictcn.DictZipFile;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
+
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-
 
 class Location {
 	public int offset;
@@ -33,7 +33,7 @@ public class StarDict {
 	 * 
 	 */
 	public StarDict() {
-		this("//mnt/sdcard/recitedictcn/langdao_ec_gb");
+		this("/mnt/sdcard/recitedictcn/langdao_ec_gb");
 	}
 	
 	/**
@@ -44,7 +44,7 @@ public class StarDict {
 		try {
 			this.dictname = dictname;
 			this.index = new RandomAccessFile(dictname+".idx", "r");
-			this.dz = new DictZipFile(dictname+".dict.gz");
+			this.dz = new DictZipFile(dictname+".dz");
 			this.yaindex = new RandomAccessFile(dictname+".yaidx", "r");
 			//this.dz.runtest();
 		}
@@ -218,8 +218,8 @@ public class StarDict {
        return strcmp(s1, s2);
        else
        return a;
-     * fortitude.zhang, 2011/12/26
-     */
+       * fortitude.zhang, 2011/12/26
+       */
     private int stardictStrcmp(String str1, String str2) {
         int a;
 
@@ -244,4 +244,6 @@ public class StarDict {
 		//System.out.println(dict.getExplanation(w));
 		System.out.println(dict.getExplanation("this"));
 	}
+
+
 }

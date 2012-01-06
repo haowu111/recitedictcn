@@ -14,6 +14,7 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.*;
+import android.widget.AdapterView.OnItemClickListener;
 import android.database.Cursor;
 import android.util.Log;
 import android.content.Intent;
@@ -27,6 +28,9 @@ import android.content.DialogInterface;
 
 import com.fortitude.recitedictcn.DataBase;
 import com.fortitude.recitedictcn.NewWord;
+//import com.fortitude.recitedictcn.SelectWord;
+import com.fortitude.recitedictcn.ActionItem;
+import com.fortitude.recitedictcn.QuickAction;
 
 public class MainDisplay extends Activity {
     ListView innerLv;
@@ -38,53 +42,70 @@ public class MainDisplay extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        /* 获取list view */
         innerLv = (ListView)findViewById(R.id.MainDisplayList);
+        /* once user begin typing, filter the list item */
+        innerLv.setTextFilterEnabled(true);
 
-        /* 注册context menu,并设置listener */
-        registerForContextMenu(innerLv);
+        innerLv.setOnItemClickListener(new OnItemClickListener() 
+            {
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) 
+                {
+                    // MenuInflater inflater = getMenuInflater();
+                    // inflater.inflate(R.menu.maindisplay_context_menu, menu);
+                    // TODO: start Quick Action Activity here
+                    //startActivity(new Intent(getApplicationContext(), SelectWord.class));
+		    ActionItem addItem 	= new ActionItem(1, "Add", getResources().getDrawable(R.drawable.ic_add));
+		    ActionItem acceptItem = new ActionItem(2, "Accept", getResources().getDrawable(R.drawable.ic_accept));
+		    ActionItem uploadItem = new ActionItem(3, "Upload", getResources().getDrawable(R.drawable.ic_up));	       
 
-        innerLv.setOnLongClickListener(new OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    Toast t = Toast.makeText(getApplicationContext(), 
-                                             "关于这个软件嘛，没有啥好说的，目前仅为张东亚和老婆使用。", 
-                                             Toast.LENGTH_SHORT);
-                    return true;
+		    final QuickAction mQuickAction = new QuickAction(getApplicationContext());
+
+		    uploadItem.setSticky(false);
+		
+		    mQuickAction.addActionItem(addItem);
+		    mQuickAction.addActionItem(acceptItem);
+		    mQuickAction.addActionItem(uploadItem);		    
+
+		    //setup the action item click listener
+		    mQuickAction.setOnActionItemClickListener(new QuickAction.OnActionItemClickListener() {
+			    @Override
+			    public void onItemClick(QuickAction quickAction, int pos, int actionId) {
+				ActionItem actionItem = quickAction.getActionItem(pos);
+				
+				if (actionId == 1) {
+				    Toast.makeText(getApplicationContext(), "Add item selected", Toast.LENGTH_SHORT).show();
+				} else {
+				    Toast.makeText(getApplicationContext(), actionItem.getTitle() + " selected", Toast.LENGTH_SHORT).show();
+				}
+			    }
+			});
+		
+		    mQuickAction.setOnDismissListener(new QuickAction.OnDismissListener() {
+			    @Override
+			    public void onDismiss() {
+				Toast.makeText(getApplicationContext(), "Ups..dismissed", Toast.LENGTH_SHORT).show();
+			    }
+			});
+		    
+		    mQuickAction.show(view);
                 }
             });
 
-        /* 暂时不用listener这种方式创建context menu */
-        // innerLv.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
-        //         @Override
-        //         public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-        //             MenuInflater inflater = getMenuInflater();
-        //             inflater.inflate(R.menu.maindisplay_context_menu, menu);
-        //         }
-        // });
+        /* No context menu for list view, registerForContextMenu(innerLv); */
 
-        /* 注册listview的touch处理函数 */
-        //todo，弹出菜单，进行后续处理
-        /* innerLv.setOnItemLongClickListener(     
-           int selectedPosition = adapterView.getSelectedItemPosition(); 
-           ShowAlert(String.valueOf(selectedPosition)); 
-           }; */
-
-        /* 创建一个db */
         db = new DataBase(this);
         db.open();
 
-        /* 调用函数，将单词数据添加到列表中 */
         refreshListView();
     }
 
-    /* 本函数用于将数据库中的表更新到LISTVIEW上 */
+    /* reload db data to list */
     public void refreshListView() {
         Cursor c = db.getAllWords();
         List<String> data = new ArrayList<String>();
 
         while (c.moveToNext()) {
-            String str = c.getString(0) + "熟悉度***-" + c.getString(1);
+            String str = c.getString(0) + "---[熟悉度]---" + c.getString(1);
             data.add(str);
         }           
 

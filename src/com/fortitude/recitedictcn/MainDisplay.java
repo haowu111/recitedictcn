@@ -28,76 +28,104 @@ import android.content.DialogInterface;
 
 import com.fortitude.recitedictcn.DataBase;
 import com.fortitude.recitedictcn.NewWord;
-//import com.fortitude.recitedictcn.SelectWord;
 import com.fortitude.recitedictcn.ActionItem;
 import com.fortitude.recitedictcn.QuickAction;
 
-public class MainDisplay extends Activity {
+public class MainDisplay extends Activity 
+{
     ListView innerLv;
     DataBase db;
 
-    /** Called when the activity is first created. */
+    // Called when the activity is first created.
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.main);
 
-        innerLv = (ListView)findViewById(R.id.MainDisplayList);
-        /* once user begin typing, filter the list item */
-        innerLv.setTextFilterEnabled(true);
+		innerLv = (ListView)findViewById(R.id.MainDisplayList);
+		// Once user begin typing, filter the list item.
+		innerLv.setTextFilterEnabled(true);
 
-        innerLv.setOnItemClickListener(new OnItemClickListener() 
-            {
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) 
-                {
-                    // MenuInflater inflater = getMenuInflater();
-                    // inflater.inflate(R.menu.maindisplay_context_menu, menu);
-                    // TODO: start Quick Action Activity here
-                    //startActivity(new Intent(getApplicationContext(), SelectWord.class));
-		    ActionItem addItem 	= new ActionItem(1, "Add", getResources().getDrawable(R.drawable.ic_add));
-		    ActionItem acceptItem = new ActionItem(2, "Accept", getResources().getDrawable(R.drawable.ic_accept));
-		    ActionItem uploadItem = new ActionItem(3, "Upload", getResources().getDrawable(R.drawable.ic_up));	       
+		innerLv.setOnItemClickListener(new OnItemClickListener() {
+				public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+					// TODO: design a better icon(current icons are not correct).
+					ActionItem viewWordItem = new ActionItem(0, "查看单词", getResources().getDrawable(R.drawable.ic_up));
+					ActionItem decFamiItem = new ActionItem(1, "减少熟悉度", getResources().getDrawable(R.drawable.ic_up));
+					ActionItem incFamiItem 	= new ActionItem(2, "增加熟悉度", getResources().getDrawable(R.drawable.ic_up));
+					ActionItem delWordItem = new ActionItem(3, "删除单词", getResources().getDrawable(R.drawable.ic_up));	       
 
-		    final QuickAction mQuickAction = new QuickAction(getApplicationContext());
+					final QuickAction mQuickAction = new QuickAction(getApplicationContext());
 
-		    uploadItem.setSticky(false);
+					mQuickAction.addActionItem(viewWordItem);
+					mQuickAction.addActionItem(decFamiItem);
+					mQuickAction.addActionItem(incFamiItem);		    
+					mQuickAction.addActionItem(delWordItem);
+
+					mQuickAction.setOnActionItemClickListener(new QuickAction.OnActionItemClickListener() {
+							@Override
+							public void onItemClick(QuickAction quickAction, int pos, int actionId) {
+								// ActionItem actionItem = quickAction.getActionItem(pos);
+								String selected = (String)innerLv.getItemAtPosition(position);
+								if (null != selected) {
+									int indexCN = selected.indexOf("熟悉度");
+									int indexFamiliarity = selected.indexOf("-");
+									String key = selected.substring(0, indexCN);
+									String familiarity = selected.substring(indexFamiliarity + 1);
+									int newFamiliarity = Integer.parseInt(familiarity);
+
+									switch (actionId) {
+									case 0: {
+										Intent i = new Intent(getApplicationContext(), ShowNewWord.class);
+										i.putExtra("key", key);
+										startActivityForResult(i, 0x1986);
+									}
+										break;
+									case 1: {
+										if (1 <= newFamiliarity - 1) 
+										{
+											db.updateWord(key, newFamiliarity - 1);
+											refreshListView();
+										}
+									}
+										break;
+									case 2: {
+										if (5 >= newFamiliarity + 1) 
+										{
+											db.updateWord(key, newFamiliarity + 1);
+											refreshListView();
+										}
+									}
+										break;
+									case 3: {
+										db.deleteWord(key);
+										refreshListView();
+									}
+										break;
+									default:
+										break;
+									}
+								}
+							}
+						});
 		
-		    mQuickAction.addActionItem(addItem);
-		    mQuickAction.addActionItem(acceptItem);
-		    mQuickAction.addActionItem(uploadItem);		    
+					mQuickAction.setOnDismissListener(new QuickAction.OnDismissListener() {
+							@Override
+							public void onDismiss() {
+								// Toast.makeText(getApplicationContext(), "Ups..dismissed", Toast.LENGTH_SHORT).show();
+							}
+						});
 
-		    //setup the action item click listener
-		    mQuickAction.setOnActionItemClickListener(new QuickAction.OnActionItemClickListener() {
-			    @Override
-			    public void onItemClick(QuickAction quickAction, int pos, int actionId) {
-				ActionItem actionItem = quickAction.getActionItem(pos);
-				
-				if (actionId == 1) {
-				    Toast.makeText(getApplicationContext(), "Add item selected", Toast.LENGTH_SHORT).show();
-				} else {
-				    Toast.makeText(getApplicationContext(), actionItem.getTitle() + " selected", Toast.LENGTH_SHORT).show();
+					mQuickAction.show(view);
 				}
-			    }
 			});
-		
-		    mQuickAction.setOnDismissListener(new QuickAction.OnDismissListener() {
-			    @Override
-			    public void onDismiss() {
-				Toast.makeText(getApplicationContext(), "Ups..dismissed", Toast.LENGTH_SHORT).show();
-			    }
-			});
-		    
-		    mQuickAction.show(view);
-                }
-            });
 
-        /* No context menu for list view, registerForContextMenu(innerLv); */
+		// No context menu for list view, registerForContextMenu(innerLv);
 
-        db = new DataBase(this);
-        db.open();
+		db = new DataBase(this);
+		db.open();
 
-        refreshListView();
-    }
+		refreshListView();
+	}
 
     /* reload db data to list */
     public void refreshListView() {
@@ -105,7 +133,7 @@ public class MainDisplay extends Activity {
         List<String> data = new ArrayList<String>();
 
         while (c.moveToNext()) {
-            String str = c.getString(0) + "---[熟悉度]---" + c.getString(1);
+            String str = c.getString(0) + "熟悉度***-" + c.getString(1);
             data.add(str);
         }           
 
@@ -163,74 +191,6 @@ public class MainDisplay extends Activity {
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.maindisplay_context_menu, menu);
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        case R.id.showNewWord: {
-            String selected = (String)innerLv.getSelectedItem();
-            if (null != selected) {
-                int indexCN = selected.indexOf("熟悉度");
-                String key = selected.substring(0, indexCN);
-
-                /* 启动显示新词的activity */
-                Intent i = new Intent(this, ShowNewWord.class);
-                i.putExtra("key", key);
-                startActivityForResult(i, 0x1986);
-                return true;                
-            }
-
-            return false;
-        }
-        case R.id.deleteFamiliarWord: {
-            String selected = (String)innerLv.getSelectedItem();
-            if (null != selected) {
-                int indexCN = selected.indexOf("熟悉度");
-                String key = selected.substring(0, indexCN);
-                db.deleteWord(key);
-                refreshListView();
-            }
-
-            return true;                    
-        }
-        case R.id.incFamiliarity: {
-            String selected = (String)innerLv.getSelectedItem();
-            if (null != selected) {
-                int indexCN = selected.indexOf("熟悉度");
-                int indexFamiliarity = selected.indexOf("-");
-                String key = selected.substring(0, indexCN);
-                String familiarity = selected.substring(indexFamiliarity + 1);
-
-                int newFamiliarity = Integer.parseInt(familiarity);
-                if (5 >= newFamiliarity + 1) {
-                    db.updateWord(key, newFamiliarity + 1);
-                    refreshListView();
-                }
-            }
-
-            return true;                    
-        }
-        case R.id.decFamiliarity: {
-            String selected = (String)innerLv.getSelectedItem();
-            if (null != selected) {
-                int indexCN = selected.indexOf("熟悉度");
-                int indexFamiliarity = selected.indexOf("-");
-                String key = selected.substring(0, indexCN);
-                String familiarity = selected.substring(indexFamiliarity + 1);
-
-                int newFamiliarity = Integer.parseInt(familiarity);
-                if (1 <= newFamiliarity - 1) {
-                    db.updateWord(key, newFamiliarity - 1);
-                    refreshListView();
-                }
-            }
-
-            return true;                    
-        }
-        default:
-            return false;
-        }
     }
 
     protected void onActivityResult(int requestCode, int resultCode,Intent data) {

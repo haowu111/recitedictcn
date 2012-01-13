@@ -22,8 +22,10 @@ import javax.xml.parsers.SAXParser;
 import com.fortitude.recitedictcn.DictcnXMLHandler;
 
 public class NetQueryHelper {
-    public String query(String newWord) {
-        try {
+    public String query(String newWord) 
+    {
+        try 
+        {
             /* 测试XML读取 */
             URL url = new URL("http://dict.cn/ws.php?utf8=true&q=" + newWord);
 
@@ -45,7 +47,9 @@ public class NetQueryHelper {
             String text = myHandler.getWordContent();
 
             return text;
-        } catch (Exception e) {
+        } 
+        catch (Exception e) 
+        {
             /* TODO: exception handler */
             return "";
         }

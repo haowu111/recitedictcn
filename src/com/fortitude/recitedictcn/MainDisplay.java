@@ -50,10 +50,10 @@ public class MainDisplay extends Activity {
 
         innerLv.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                ActionItem viewWordItem = new ActionItem(0, "查看单词", getResources().getDrawable(R.drawable.ic_up));
-                ActionItem decFamiItem = new ActionItem(1, "减少熟悉度", getResources().getDrawable(R.drawable.ic_up));
-                ActionItem incFamiItem 	= new ActionItem(2, "增加熟悉度", getResources().getDrawable(R.drawable.ic_up));
-                ActionItem delWordItem = new ActionItem(3, "删除单词", getResources().getDrawable(R.drawable.ic_up));	       
+                ActionItem viewWordItem = new ActionItem(0, "查看单词", getResources().getDrawable(R.drawable.ic_show));
+                ActionItem decFamiItem = new ActionItem(1, "减少熟悉度", getResources().getDrawable(R.drawable.ic_dec));
+                ActionItem incFamiItem 	= new ActionItem(2, "增加熟悉度", getResources().getDrawable(R.drawable.ic_inc));
+                ActionItem delWordItem = new ActionItem(3, "删除单词", getResources().getDrawable(R.drawable.ic_delete));	       
 
                 final QuickAction mQuickAction = new QuickAction(getApplicationContext());
 

@@ -5,7 +5,7 @@
  * Author: fortitude.zhang@gmail.com
  */
 
-/* 数据库接口，实现DataBase相关API功能 */
+// Database implementation,which is used for record new word permanently.
 package com.fortitude.recitedictcn;
 
 import android.content.ContentValues;
@@ -31,66 +31,53 @@ public class DataBase {
 	private DataBasehelper dbHelper;
 	private SQLiteDatabase db;
 	
-	public DataBase(Context ctx)
-	{
-		this.context = ctx;
-		dbHelper = new DataBasehelper(context);
-	}
+	public DataBase(Context ctx) {
+        this.context = ctx;
+        dbHelper = new DataBasehelper(context);
+    }
 	
-	private static class DataBasehelper extends SQLiteOpenHelper
-	{
-		DataBasehelper(Context context)
-		{
-			super(context, DATABASE_NAME, null, DATABASE_VERSION);
-		}
+	private static class DataBasehelper extends SQLiteOpenHelper {
+		DataBasehelper(Context context) {
+            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        }
 		
 		@Override
-		public void onCreate(SQLiteDatabase db)
-		{
-			db.execSQL(DATABASE_CREATE);
-		}
+		public void onCreate(SQLiteDatabase db) {
+            db.execSQL(DATABASE_CREATE);
+        }
 		
 		@Override
-		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
-		{
-			Log.w(TAG, "Upgrading DataBase from version " + oldVersion
+		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            Log.w(TAG, "Upgrading DataBase from version " + oldVersion
                   + " to "
                   + newVersion + ", which will destroy all old data");
             db.execSQL("DROP TABLE IF EXISTS recitedictcn_table");
             onCreate(db);
-		}
+        }
 	}
 	
 
-	/* 打开数据库*/
-	public DataBase open() throws SQLException
-	{
-		db = dbHelper.getWritableDatabase();		
-		return this;
-	}
+	public DataBase open() throws SQLException {
+        db = dbHelper.getWritableDatabase();		
+        return this;
+    }
 	
-	/* 关闭数据库 */
-	public void close()
-	{
-		dbHelper.close();
-	}
+	public void close() {
+        dbHelper.close();
+    }
 	
-	/* 插入新的单词 */
-	public long insertWord(String word, Integer familiar, String content)
-	{		
-		ContentValues initialValues = new ContentValues();
+	public long insertWord(String word, Integer familiar, String content) {		
+        ContentValues initialValues = new ContentValues();
 
-		initialValues.put(KEY_WORD, word);
-		initialValues.put(KEY_FAMILIAR, familiar);
-		initialValues.put(KEY_CONTENT, content);
+        initialValues.put(KEY_WORD, word);
+        initialValues.put(KEY_FAMILIAR, familiar);
+        initialValues.put(KEY_CONTENT, content);
 
-		return db.insert(DATABASE_TABLE, null, initialValues);
-	}
+        return db.insert(DATABASE_TABLE, null, initialValues);
+    }
 
 
-	/* 删除旧的单词 */
-    public boolean deleteWord(String word)
-    {
+    public boolean deleteWord(String word) {
         String[] whereValue = {word};
         try {
             db.delete(DATABASE_TABLE, KEY_WORD + "=?", whereValue);
@@ -101,9 +88,8 @@ public class DataBase {
         return true;
     }
 
-    /* 删除所有的单词记录 */
-    public boolean deleteAllWord()
-    {
+
+    public boolean deleteAllWord() {
         try {
             db.delete(DATABASE_TABLE, "1", null);
         } catch (Exception e) {
@@ -113,9 +99,7 @@ public class DataBase {
         return true;
     }
 
-    /* 取得所有单词 */
-    public Cursor getAllWords()
-    {
+    public Cursor getAllWords() {
         return db.query(DATABASE_TABLE, 
                         new String[] {KEY_WORD, KEY_FAMILIAR, KEY_CONTENT},
                         null,
@@ -126,9 +110,7 @@ public class DataBase {
     }
 
 
-    /* 取得指定单词 */
-    public Cursor getWord(String word) throws SQLException
-    {
+    public Cursor getWord(String word) throws SQLException {
         Cursor mCursor = db.query(true, 
                                   DATABASE_TABLE, 
                                   new String[] {KEY_WORD, KEY_FAMILIAR, KEY_CONTENT},
@@ -145,9 +127,7 @@ public class DataBase {
         return mCursor;
     }
 
-    /* 更新一个标题 */
-    public boolean updateWord(String word, Integer familiar)
-    {
+    public boolean updateWord(String word, Integer familiar) {
         ContentValues initialValues = new ContentValues();
         String[] whereValue = {word};
         

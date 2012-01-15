@@ -5,6 +5,9 @@
  * Author: fortitude.zhang@gmail.com
  */
 
+// Stardict word loopup operation, the style of it is quite different with my
+// style,so I decided to let it be...
+
 package com.fortitude.recitedictcn;
 
 import com.fortitude.recitedictcn.DictZipFile;

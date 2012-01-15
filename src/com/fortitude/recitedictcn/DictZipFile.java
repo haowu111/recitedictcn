@@ -5,6 +5,9 @@
  * Author: fortitude.zhang@gmail.com
  */
 
+// Stardict zip dictionary file operation, the style of it is quite different with my
+// style,so I decided to let it be...
+
 package com.fortitude.recitedictcn;
 
 import java.io.ByteArrayInputStream;
@@ -25,9 +28,6 @@ class Chunk {
 }
 
 public class DictZipFile {
-	/**
-	 * 
-	 */
 	private RandomAccessFile dictzip;
 	
 	final int FTEXT = 1;
@@ -47,13 +47,9 @@ public class DictZipFile {
 	
 	private List<Chunk> chunks;
 	
-	/**
-	 * 
-	 * @param dictzipfilename
-	 */
 	public DictZipFile(String dictzipfilename) {
 		try {
-			dictzip = new RandomAccessFile(dictzipfilename,"r");
+			dictzip = new RandomAccessFile(dictzipfilename, "r");
 			pos = 0;
 			_firstpos = 0;
 			chunks = new ArrayList<Chunk> ();
@@ -65,124 +61,93 @@ public class DictZipFile {
 		}
 	}
 	
-	/**
-	 * 
-	 * @param buff
-	 * @param size
-	 * @return
-	 */
 	public int read(byte[] buff, int size) throws Exception{
-		if(size<=0) {
+		if(size <= 0) {
 			return 0;
 		}
-		int firstchunk = this.pos/this.chlen;
-        int offset = this.pos - firstchunk*this.chlen;
-        int lastchunk = (this.pos+size)/this.chlen;
-        /*
-         * int finish = 0;
-         * int npos = 0;
-         * finish = offset+size;
-         * npos = this.pos+size;
-         */
+		int firstchunk = this.pos / this.chlen;
+        int offset = this.pos - firstchunk * this.chlen;
+        int lastchunk = (this.pos + size) / this.chlen;
+
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-        for(int i=firstchunk;i<=lastchunk;i++) {
+        for(int i = firstchunk; i <= lastchunk; i++) {
         	byteStream.write(this._readchunk(i));
         }
         byte [] buf = byteStream.toByteArray();
-        for(int i=0;i<size;i++) {
-        	buff[i]=buf[offset+i];
+        for(int i = 0; i < size; i++) {
+        	buff[i] = buf[offset+i];
         }
         return 0;
 	}
 	
-	/**
-	 * 
-	 * @param pos
-	 * @param where
-	 */
 	public void seek(int pos, int where) {
 		if (where == 0) {
-			this.pos=pos;
+			this.pos = pos;
 		}
-		else if (where==1) {
-				this.pos+=pos;
+		else if (where == 1) {
+            this.pos+=pos;
 		}
 		else {
-			this.pos=pos;
+			this.pos = pos;
 		}
 	}
 	
-	/**
-	 * 
-	 * @param pos
-	 */
 	public void seek(int pos) {
 		this.seek(pos,0);
 	}
 	
-	/**
-	 * 
-	 * @return
-	 */
 	public int tell() {
 		return this.pos;
 	}
 	
-	/**
-	 * 
-	 * @throws Exception
-	 */
 	public void close() throws Exception{
 		this.dictzip.close();
 	}
 	
-	/**
-	 * 
-	 * @throws Exception
-	 */
 	private void _read_gzip_header() throws Exception {
 		byte [] buffer = new byte[2];
 		dictzip.read(buffer);
-		this._firstpos+=2;
-        /* stardict lib/dictziplib.cpp GZIP_MAGIC1 / GZIP_MAGIC2 ,fortitude.zhang, 2011/12/25 */
+		this._firstpos += 2;
+
+        // Stardict lib/dictziplib.cpp GZIP_MAGIC1 / GZIP_MAGIC2 ,fortitude.zhang, 2011/12/25
 		if (buffer[0]!= 31 || buffer[1] != -117) {
 			throw new Exception("Not a gzipped file");
 		}
+
 		byte b = dictzip.readByte();
-		this._firstpos+=1;
-		if(b != 8) {
+		this._firstpos += 1;
+		if (b != 8) {
 			throw new Exception("Unknown compression method");
 		}
+
 		byte flag = dictzip.readByte();
-		//System.out.println("flag = "+flag);
-		this._firstpos+=1;
+		this._firstpos += 1;
 		dictzip.readInt();
 		dictzip.readByte();
 		dictzip.readByte();
-		this._firstpos+=6;
+		this._firstpos += 6;
 		int xlen = 0;
-		if((flag & FEXTRA)!=0) {
-            /* Don't be confused,as in gzip standard discribed, gzip header use little endian,why?I donnot know.See below:
-             *  http://www.gzip.org/zlib/rfc-gzip.html#header-trailer
-             * fortitude.zhang, 2011/12/25
-             */
+		if ((flag & FEXTRA) != 0) {
+            // Don't be confused,as in gzip standard discribed, gzip header use little endian,why?I donnot know.See below:
+            // http://www.gzip.org/zlib/rfc-gzip.html#header-trailer
+            // fortitude.zhang, 2011/12/25
 			xlen = dictzip.readUnsignedByte();
-			xlen +=  256*dictzip.readUnsignedByte();
+			xlen +=  256 * dictzip.readUnsignedByte();
 			byte [] extra = new byte[xlen];
 			dictzip.read(extra);
-			this._firstpos+=2+xlen;
+			this._firstpos += 2 + xlen;
 			int ext = 0;
-			while(true) {
-				 int l = ((int)extra[ext+2]&0xff)+(256*((int)extra[ext+3]&0xff));
-				 if (extra[ext+0]!='R' || extra[ext+1]!='A') {
-					 ext=4+l;
-					 if(ext>xlen) {
-						 throw new Exception("Missing dictzip extension");
-					 }
-				 }
-				 else {
-					 break;
-				 }
+			while (true) {
+                int l = ((int)extra[ext + 2] & 0xff) + (256 * ((int)extra[ext + 3] & 0xff));
+                if (extra[ext + 0] != 'R' || extra[ext + 1] != 'A') {
+                    ext= 4 + l;
+                    if(ext > xlen) {
+                        throw new Exception("Missing dictzip extension");
+                    }
+                }
+                else {
+                    break;
+                }
 			}
 			this.chlen = ((int)extra[ext+6]&0xff) + (256*((int)extra[ext+7]&0xff));
 			int chcnt = ((int)extra[ext+8]&0xff) + (256*((int)extra[ext+9]&0xff));
@@ -210,7 +175,7 @@ public class DictZipFile {
 				s = dictzip.readByte();
 				this._firstpos+=1;
                 if(s==0)
-                	break;
+                break;
 			}
 		}
 
@@ -221,7 +186,7 @@ public class DictZipFile {
 				s = dictzip.readByte();
 				this._firstpos+=1;
                 if(s==0)
-                	break;
+                break;
 			}
 		}
 		

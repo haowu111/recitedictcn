@@ -12,7 +12,7 @@ import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-/* text view 封装，避免每次设置typeface */
+// Encapsulate a new text view class to eliminate the typeface set operation every time.
 public class MyTextView extends TextView {
     private void setFont(Context context) {
         Typeface tf = Typeface.createFromAsset(context.getAssets(), "font/segoeui.ttf");   

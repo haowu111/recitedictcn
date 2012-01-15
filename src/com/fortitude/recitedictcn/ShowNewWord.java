@@ -23,7 +23,6 @@ import com.fortitude.recitedictcn.DataBase;
 import com.fortitude.recitedictcn.MyTextView;
 
 public class ShowNewWord extends Activity {    
-    /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         MyTextView wordView;

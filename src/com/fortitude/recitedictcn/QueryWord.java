@@ -5,7 +5,7 @@
  * Author: fortitude.zhang@gmail.com
  */
 
-/* 本文件用于查询新词，根据用户选项确定从本地查询或查询 */
+// Query word interface.
 package com.fortitude.recitedictcn;
 
 import com.fortitude.recitedictcn.LocalQueryHelper;

@@ -5,6 +5,7 @@
  * Author: fortitude.zhang@gmail.com
  */
 
+// Web word query using dict.cn 's API.
 package com.fortitude.recitedictcn;
 
 import java.net.URL;
@@ -22,35 +23,30 @@ import javax.xml.parsers.SAXParser;
 import com.fortitude.recitedictcn.DictcnXMLHandler;
 
 public class NetQueryHelper {
-    public String query(String newWord) 
-    {
-        try 
-        {
-            /* 测试XML读取 */
+    public String query(String newWord) {
+        try {
             URL url = new URL("http://dict.cn/ws.php?utf8=true&q=" + newWord);
 
-            /* Get a SAXParser from the SAXPArserFactory. */
+            // Get a SAXParser from the SAXPArserFactory.
             SAXParserFactory spf = SAXParserFactory.newInstance();
             SAXParser sp = spf.newSAXParser();
 
-            /* Get the XMLReader of the SAXParser we created. */
+            // Get the XMLReader of the SAXParser we created.
             XMLReader xr = sp.getXMLReader();
-            /* Create a new ContentHandler and apply it to the XML-Reader*/
+            // Create a new ContentHandler and apply it to the XML-Reader.
             DictcnXMLHandler myHandler = new DictcnXMLHandler();
             xr.setContentHandler(myHandler);
 
-            /* Parse the xml-data from our URL. */
+            // Parse xml data from the server.
             xr.parse(new InputSource(url.openStream()));
-            /* Parsing has finished. */ 
 
-            /* 取出解析结果 */
+            // Get result.
             String text = myHandler.getWordContent();
 
             return text;
         } 
-        catch (Exception e) 
-        {
-            /* TODO: exception handler */
+        catch (Exception e) {
+            // TODO: exception handling.
             return "";
         }
     }

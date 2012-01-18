@@ -23,6 +23,5 @@ Merry Christmas! 修复本地查找的问题，目前本地查询功能已经正
 
 下载方式
 ========
-* 安装包（未签名）：bin/recitedictcn-debug-{version}.apk
-* 字典（朗道中英字典，使用与stardict相同格式的词典库，但额外生成了一个索引文件）下载：bin/langdao_ec_gb.tar.gz
-  字典下载后，请将字典包中的５个文件放在sdcard/recitedictcn的目录（目录请自行创建）中。
+* 安装包（未签名）：release/recitedictcn-debug-{current-version}.apk
+* 字典（朗道中英字典，使用与stardict相同格式的词典库，但额外生成了一个索引文件）下载：release/langdao_ec_gb.tar.gz，字典下载后，请将字典包中的５个文件放在sdcard/recitedictcn的目录（目录请自行创建）中。
